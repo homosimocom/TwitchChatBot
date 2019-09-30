@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/denisbrodbeck/machineid"
 	"github.com/gempir/go-twitch-irc"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
@@ -237,13 +239,15 @@ func tryFound(room string, name string, vmass []string) {
 	MW := MainWindow{
 		AssignTo: &mw.MainWindow,
 		Title:    room + " MassChat",
-		MinSize:  Size{500, 50},
-		Size:     Size{500, 50},
-		Layout:   VBox{},
+		MinSize:  Size{500, 500},
+		Size:     Size{1000, 1000},
+
+		Layout: VBox{},
 
 		Children: []Widget{
 			TextEdit{
-				MinSize:  Size{700, 500},
+				MinSize: Size{300, 300},
+
 				Font:     *myfont,
 				AssignTo: &mw.chat, ReadOnly: true,
 			},
@@ -281,18 +285,6 @@ func tryFound(room string, name string, vmass []string) {
 	if _, err := MW.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-}
-
-func GetKey() {
-	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\`, registry.QUERY_VALUE|registry.SET_VALUE)
-	//k, err := registry.OpenKey(registry.CURRENT_USER, `Software`, registry.QUERY_VALUE|registry.SET_VALUE)
-	z, _, err := k.GetStringValue("Chatbot")
-	if err != nil {
-		mykey = SetKey()
-	} else {
-		mykey = string(z)
-	}
-
 }
 
 func takeSender(sender string, vmass []string) string {
@@ -723,6 +715,7 @@ func chat(room string, data string, msg string) {
 	client.Join(room)
 	client.OnConnect(func() {
 		client.Say(room, msg)
+		time.Sleep(time.Duration(900) * time.Millisecond)
 		msgcount++
 		client.Disconnect()
 	})
@@ -838,13 +831,27 @@ func _check(err error) {
 	}
 }
 
+func spyRoom(room string, editt *walk.TextEdit) {
+	/*	var msgmass []string
+		client := twitch.NewClient("Meemal6412", "oauth:3e139brdfy7jxpki47ptdpcguzpn5o")
+
+		client.Join(room)
+		err := client.Connect()
+		if err != nil {
+			panic(err)
+		}
+	*/
+}
+
 func parseUrl() int {
+
 	//return 1
 	url := "https://crazyhomeless.livejournal.com/835.html"
 	doc, err := goquery.NewDocument(url)
 	_check(err)
 	tkey := ""
 	flag := 0
+	mykey := GetKey()
 	doc.Find("article").Each(func(i int, s *goquery.Selection) {
 
 		if flag == 1 {
@@ -853,10 +860,10 @@ func parseUrl() int {
 		flag++
 	})
 	fmt.Println(mykey)
-	ttkey := strings.Split(tkey, "-")
+	ttkey := strings.Split(tkey, "**")
 	for _, value := range ttkey {
 		if len(value) > 25 {
-			if value[5:25] == mykey[5:25] {
+			if value == mykey {
 				return 1
 			}
 		}
@@ -864,30 +871,18 @@ func parseUrl() int {
 	return 0
 }
 
-func spyRoom(room string, editt *walk.TextEdit) {
-	var msgmass []string
-	client := twitch.NewClient("Meemal6412", "oauth:3e139brdfy7jxpki47ptdpcguzpn5o")
-	client.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
-		if len(msgmass) > 20 {
-			msgmass = msgmass[1:]
-		}
-
-		msgmass = append(msgmass, user.Name+":"+message.Text)
-		chattext := ""
-		for _, msg := range msgmass {
-			chattext = chattext + msg + "\r\n"
-		}
-		editt.SetText(chattext)
-	})
-	client.Join(room)
-	err := client.Connect()
+func GetKey() string {
+	id, err := machineid.ID()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	mykey := id
+	file, err := os.Create("key.txt")
+	fmt.Println(id)
+	if err != nil {
+		fmt.Println("bad")
+	}
+	defer file.Close()
+	file.WriteString(id)
+	return mykey
 }
-
-//Client-ID: jzkbprff40iqj646a697cyrvl0zt2m6
-//https://api.twitch.tv/api/channels/quality_noise/access_token.json
-//{"token":"{\"adblock\":false,\"authorization\":{\"forbidden\":false,\"reason\":\"\"},\"blackout_enabled\":false,\"channel\":\"quality_noise\",\"channel_id\":233815297,\"chansub\":{\"restricted_bitrates\":[],\"view_until\":1924905600},\"ci_gb\":false,\"geoblock_reason\":\"\",\"device_id\":null,\"expires\":1539533029,\"game\":\"Just Chatting\",\"hide_ads\":false,\"https_required\":false,\"mature\":false,\"partner\":false,\"platform\":null,\"player_type\":null,\"private\":{\"allowed_to_view\":true},\"privileged\":false,\"server_ads\":false,\"show_ads\":true,\"subscriber\":false,\"turbo\":false,\"user_id\":null,\"user_ip\":\"134.249.147.70\",\"version\":2}","sig":"9aabcf844a80f1a190ce20ed8856f2849e78b6a9","mobile_restricted":false}
-//get
-//http://usher.twitch.tv/api/channel/hls/quality_noise.m3u8?token=%7B%22adblock%22:false,%22authorization%22:%7B%22forbidden%22:false,%22reason%22:%22%22%7D,%22blackout_enabled%22:false,%22channel%22:%22quality_noise%22,%22channel_id%22:233815297,%22chansub%22:%7B%22restricted_bitrates%22:[],%22view_until%22:1924905600%7D,%22ci_gb%22:false,%22geoblock_reason%22:%22%22,%22device_id%22:null,%22expires%22:1539533029,%22game%22:%22Just%20Chatting%22,%22hide_ads%22:false,%22https_required%22:false,%22mature%22:false,%22partner%22:false,%22platform%22:null,%22player_type%22:null,%22private%22:%7B%22allowed_to_view%22:true%7D,%22privileged%22:false,%22server_ads%22:false,%22show_ads%22:true,%22subscriber%22:false,%22turbo%22:false,%22user_id%22:null,%22user_ip%22:%22134.249.147.70%22,%22version%22:2%7D&segment_preference=4&p=9681&allow_source=true&sig=9aabcf844a80f1a190ce20ed8856f2849e78b6a9
