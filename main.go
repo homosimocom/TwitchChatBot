@@ -843,34 +843,6 @@ func spyRoom(room string, editt *walk.TextEdit) {
 	*/
 }
 
-func parseUrl() int {
-
-	//return 1
-	url := "https://crazyhomeless.livejournal.com/835.html"
-	doc, err := goquery.NewDocument(url)
-	_check(err)
-	tkey := ""
-	flag := 0
-	mykey := GetKey()
-	doc.Find("article").Each(func(i int, s *goquery.Selection) {
-
-		if flag == 1 {
-			tkey = strings.TrimSpace(s.Text())
-		}
-		flag++
-	})
-	fmt.Println(mykey)
-	ttkey := strings.Split(tkey, "**")
-	for _, value := range ttkey {
-		if len(value) > 25 {
-			if value == mykey {
-				return 1
-			}
-		}
-	}
-	return 0
-}
-
 func GetKey() string {
 	id, err := machineid.ID()
 	if err != nil {
