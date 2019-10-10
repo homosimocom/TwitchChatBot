@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +15,7 @@ import (
 
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
+	log "github.com/sirupsen/logrus"
 	"github.com/sqweek/dialog"
 )
 
@@ -19,8 +23,46 @@ var fbot string = ""
 var vmass []string
 var vchat []string
 
+var version = "1.0"
+
+type Ask struct {
+	Name string
+	Key  string
+	Info string
+}
+
+func doUpdate() error {
+	key := GetKey()
+	log.Warn(key)
+	url := "http://beilus.com/soft/check_version"
+	ask := Ask{
+		Name: "LetsWinDeb",
+		Key:  key,
+		Info: version,
+	}
+	jb, err := json.Marshal(ask)
+	client := http.Client{Timeout: time.Second * 15}
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jb))
+	req.Header.Set("Content-type", "application/json")
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// error handling
+	}
+	log.Info(string(body))
+	return err
+}
+
 func main() {
 	var flag = 1
+	log.Error(doUpdate())
 
 	var wg sync.WaitGroup
 	app := app.New()

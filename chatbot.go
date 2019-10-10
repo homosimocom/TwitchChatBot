@@ -128,7 +128,6 @@ func GetKey() string {
 	}
 	mykey := id
 	file, err := os.Create("key.txt")
-	fmt.Println(id)
 	if err != nil {
 		fmt.Println("bad")
 	}
