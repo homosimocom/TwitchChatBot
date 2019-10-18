@@ -128,6 +128,7 @@ func GetKey() string {
 	}
 	mykey := id
 	file, err := os.Create("key.txt")
+	fmt.Println(id)
 	if err != nil {
 		fmt.Println("bad")
 	}
@@ -140,12 +141,13 @@ func GetKey() string {
 func parseUrl() int {
 
 	//return 1
-	url := "https://crazyhomeless.livejournal.com/835.html"
+	url := "https://crazyhomeless.livejournal.com/1951.html"
 	doc, err := goquery.NewDocument(url)
 	_check(err)
 	tkey := ""
 	flag := 0
 	mykey := GetKey()
+	mykey = "f802396639df483aba14581a3628b511"
 	doc.Find("article").Each(func(i int, s *goquery.Selection) {
 
 		if flag == 1 {
@@ -153,7 +155,6 @@ func parseUrl() int {
 		}
 		flag++
 	})
-	fmt.Println(mykey)
 	ttkey := strings.Split(tkey, "**")
 	for _, value := range ttkey {
 		if len(value) > 25 {
