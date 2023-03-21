@@ -202,13 +202,9 @@ func main() {
 	bad := widget.NewVBox(widget.NewVBox(
 		bbb,
 	))
-	if parseUrl() == 0 {
-		qq.Hide()
-		bbb.Show()
-	} else {
-		qq.Show()
-		bbb.Hide()
-	}
+
+	qq.Show()
+	bbb.Hide()
 	gchat.Hide()
 	connbots.Hide()
 	startchat.Hide()
