@@ -178,6 +178,7 @@ func main() {
 		gname.ReadOnly = false
 		flag = 0
 		fmt.Println("Connect bots process...")
+		fmt.Println("test")
 	})
 	startchat.Show()
 	//stopchat.Hide()
